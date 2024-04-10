@@ -1,7 +1,7 @@
 # load libraries
 library(DESeq2)
 
-# set working directory
+# set working directory where all the data files are stored
 setwd('C:/Users/toque/Desktop/CPSC_571-Design_Implementation_Database_Systems/03-Assignments/Project/yy-Data')
 
 # load count data
@@ -24,7 +24,7 @@ dds <- DESeqDataSetFromMatrix(countData=count_data, colData=sample_info, design=
 dds
 
 # remove rows with low gene counts
-# see why I picked '((997 / 8) * 10)' at these links:
+# see why we picked '((997 / 6) * 10)' at these links:
 # https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#pre-filtering
 # https://www.youtube.com/watch?v=OzNzO8qwwp0&list=PLJefJsd1yfhYa97VUXkQ4T90YH6voYjCn (9:02)
 # https://www.youtube.com/watch?v=wPzeea1Do18&t=551s (15:28)
