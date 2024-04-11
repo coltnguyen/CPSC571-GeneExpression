@@ -112,7 +112,7 @@ Fisher Ratio + K-Folds.py:
             Random Forest F1-score: 0.9649839553029995
             Random Forest AUC: 0.9942111937095254
 
-Neighbourhood Rough Set + K-Folds.py:
+Neighbourhood Rough Set (NRS) + K-Folds.py:
 
     K-Nearest Neighbors Accuracies:
         Accuracy for BRCA: 0.7692
@@ -165,3 +165,57 @@ Neighbourhood Rough Set + K-Folds.py:
             Random Forest Recall: 0.964824120603015
             Random Forest F1-score: 0.9649839553029995
             Random Forest AUC: 0.9942111937095254
+
+Principal Component Analysis (PCA) + K-Folds.py:
+
+    K-Nearest Neighbors Accuracies:
+        Accuracy for BRCA: 0.8462
+        Accuracy for BRACA: 0.8182
+        Accuracy for COCA: 0.9000
+        Accuracy for KICA: 0.7297
+        Accuracy for LECA: 0.9825
+        Accuracy for LUCA: 0.6471
+            KNN Accuracy: 0.8291457286432161
+            KNN Precision: 0.8359912090900811
+            KNN Recall: 0.8291457286432161
+            KNN F1-score: 0.8268497668901776
+            KNN AUC: 0.9621178951829807
+
+    Neural Network Accuracies:
+        Accuracy for BRCA: 0.6667
+        Accuracy for BRACA: 0.8636
+        Accuracy for COCA: 0.8000
+        Accuracy for KICA: 0.6757
+        Accuracy for LECA: 0.9649
+        Accuracy for LUCA: 0.7647
+            Neural Network Accuracy: 0.7989949748743719
+            Neural Network Precision: 0.8001025861754293
+            Neural Network Recall: 0.7989949748743719
+            Neural Network F1-score: 0.7983516611076361
+            Neural Network AUC: 0.8741424223056634
+
+    Deep Forest Accuracies:
+        Accuracy for BRCA: 0.6923
+        Accuracy for BRACA: 0.7273
+        Accuracy for COCA: 0.2000
+        Accuracy for KICA: 0.5135
+        Accuracy for LECA: 1.0000
+        Accuracy for LUCA: 0.5000
+            Deep Forest Accuracy: 0.6934673366834171
+            Deep Forest Precision: 0.714953102227161
+            Deep Forest Recall: 0.6934673366834171
+            Deep Forest F1-score: 0.6917986134634556
+            Deep Forest AUC: 0.8962591030600503
+
+    Random Forest Accuracies:
+        Accuracy for BRCA: 0.7949
+        Accuracy for BRACA: 0.7727
+        Accuracy for COCA: 0.8000
+        Accuracy for KICA: 0.7838
+        Accuracy for LECA: 0.9825
+        Accuracy for LUCA: 0.7647
+            Random Forest Accuracy: 0.8391959798994975
+            Random Forest Precision: 0.8550399482907769
+            Random Forest Recall: 0.8391959798994975
+            Random Forest F1-score: 0.8410195787156639
+            Random Forest AUC: 0.9744984757432804
