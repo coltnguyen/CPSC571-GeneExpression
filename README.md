@@ -1,5 +1,4 @@
-
-## CPSC 571 Group G-6 ‘Classifying Cancer Subtypes from Gene Expression Data’
+## CPSC 571 Group G-6 'Classifying Cancer Subtypes from Gene Expression Data'
 
 ## Authors
 - Desmarais, Jesse (00292117)
@@ -29,7 +28,7 @@ The following models are implemented in this repository:
 6. **Principal Component Analysis (PCA) + K-Folds**
 7. **ReliefF + K-Folds**
 
-Each model is implemented in a separate Python script within the `Models` folder.
+Each model is implemented in a separate Python script within the `Models` folder. All of the scripts produce the output of a Deep Forest, Random Forest, Neural Network, and K-Nearest Neighbours models.
 
 ### Fisher Ratio + K-Folds
 
@@ -106,4 +105,4 @@ This model uses the ReliefF algorithm as a feature selection method, followed by
 
 To run the models, simply execute the corresponding Python script in the `Models` folder. The scripts will load the data, preprocess it, apply the feature selection method (if applicable), and perform the K-fold cross-validation.
 
-The results of the model evaluations, including accuracy, precision, recall, F1-score, and AUC, will be printed to the console.
+The results of the model evaluations, including accuracy, precision, recall, F1-score, and AUC, will be printed to the console for the Deep Forest, Random Forest, Neural Network, and K-Nearest Neighbours models.
