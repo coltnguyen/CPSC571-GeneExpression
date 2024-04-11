@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import label_binarize
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import NearestNeighbors
 
 
 def load_large_csv(file_path):
@@ -47,23 +48,26 @@ def preprocess_data(df):
     return df, filtered_data_by_cancer_type
 
 
-def calculate_fisher_ratio(filtered_data_by_cancer_type):
+def calculate_neighborhood_rough_set(filtered_data_by_cancer_type, k=5):
     """
-    Calculate the Fisher ratio for each cancer type.
+    Calculate the Neighborhood Rough Set for each cancer type.
 
     Args:
         filtered_data_by_cancer_type (dict): A dictionary of filtered data by cancer type.
+        k (int): The number of nearest neighbors to consider.
 
     Returns:
-        dict: A dictionary containing the Fisher ratio for each cancer type.
+        dict: A dictionary containing the Neighborhood Rough Set for each cancer type.
     """
-    fisher_scores = {}
+    neighborhood_rough_sets = {}
     for cancer_type, data in filtered_data_by_cancer_type.items():
-        means = data.mean(axis=1)
-        variances = data.var(axis=1)
-        fisher_score = means.var() / variances.mean()
-        fisher_scores[cancer_type] = fisher_score
-    return fisher_scores
+        X = data.values
+        nn = NearestNeighbors(n_neighbors=k)
+        nn.fit(X)
+        distances, indices = nn.kneighbors(X)
+        rough_set_score = np.mean(distances[:, -1])
+        neighborhood_rough_sets[cancer_type] = rough_set_score
+    return neighborhood_rough_sets
 
 
 def train_and_evaluate_models(X_train, X_test, y_train, y_test, y_test_binarized, inv_cancer_type_mapping, num_classes):
@@ -172,18 +176,18 @@ if __name__ == '__main__':
     # Preprocess the data
     processed_df, filtered_data_by_cancer_type = preprocess_data(df)
 
-    # Calculate Fisher ratio for each cancer type
-    fisher_scores = calculate_fisher_ratio(filtered_data_by_cancer_type)
-    print(fisher_scores)
+    # Calculate Neighborhood Rough Set for each cancer type
+    neighborhood_rough_sets = calculate_neighborhood_rough_set(filtered_data_by_cancer_type)
+    print(neighborhood_rough_sets)
 
-    # Merge Fisher scores with the processed DataFrame and sort by Fisher score
-    fisher_df = pd.DataFrame.from_dict(fisher_scores, orient='index', columns=['Fisher Score'])
-    merged_df = pd.merge(processed_df, fisher_df, left_index=True, right_index=True)
-    sorted_df = merged_df.sort_values(by='Fisher Score', ascending=False)
+    # Merge Neighborhood Rough Set scores with the processed DataFrame and sort by score
+    neighborhood_rough_set_df = pd.DataFrame.from_dict(neighborhood_rough_sets, orient='index', columns=['Neighborhood Rough Set Score'])
+    merged_df = pd.merge(processed_df, neighborhood_rough_set_df, left_index=True, right_index=True)
+    sorted_df = merged_df.sort_values(by='Neighborhood Rough Set Score', ascending=False)
 
     # Select the top k features
     k = 1000
-    # Select the top k features based on Fisher score
+    # Select the top k features based on Neighborhood Rough Set score
     top_features = sorted_df.iloc[:, :-1].columns[:k]
 
     # Map cancer types to numerical labels
