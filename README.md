@@ -24,6 +24,7 @@ The following Python packages are required to run the models:
 - scikit-learn
 - tensorflow
 - ReliefF
+- keras-tuner
 
 ### Installation
 `pip install -r requirements.txt`
