@@ -2,184 +2,221 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from GCForest import gcForest
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Input
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.preprocessing import label_binarize
+from sklearn.ensemble import RandomForestClassifier
+
 
 def load_large_csv(file_path):
     """
-    Loads a CSV file into a DataFrame.
+    Load a large CSV file into a pandas DataFrame.
 
-    Parameters:
-    - file_path (str): The path to the CSV file.
+    Args:
+        file_path (str): The path to the CSV file.
 
     Returns:
-    - DataFrame: The loaded data.
+        pd.DataFrame: The loaded DataFrame.
     """
     return pd.read_csv(file_path)
 
+
 def preprocess_data(df):
     """
-    Preprocesses the data by removing unnecessary columns, extracting cancer types, and transposing the DataFrame.
+    Preprocess the input DataFrame by removing unnecessary columns, splitting data by cancer type,
+    and transposing the DataFrame.
 
-    Parameters:
-    - df (DataFrame): The input data.
+    Args:
+        df (pd.DataFrame): The input DataFrame.
 
     Returns:
-    - tuple: A tuple containing the processed DataFrame and a dictionary of data filtered by cancer type.
+        tuple: A tuple containing the preprocessed DataFrame and a dictionary of filtered data by cancer type.
     """
-    # Drop the first column which is 'Unnamed: 0'
     df = df.drop(columns=['Unnamed: 0'])
-
-    # Extract unique cancer types from column names
     cancer_types = df.columns.str.split('_').str[-1].unique()
-
-    # Initialize a dictionary to store data filtered by cancer type
-    filtered_data_by_cancer_type = {}
-    for cancer_type in cancer_types:
-        # Select columns corresponding to the current cancer type
-        columns_for_type = df.columns[df.columns.str.endswith(cancer_type)]
-        filtered_data_by_cancer_type[cancer_type] = df[columns_for_type]
-
-    # Transpose the DataFrame for analysis (samples as rows, genes as columns)
+    filtered_data_by_cancer_type = {
+        cancer_type: df[df.columns[df.columns.str.endswith(cancer_type)]]
+        for cancer_type in cancer_types
+    }
     df = df.transpose()
-
-    # Optionally, rename columns to gene indices for clarity
     df.columns = range(df.shape[1])
-
     return df, filtered_data_by_cancer_type
+
 
 def calculate_fisher_ratio(filtered_data_by_cancer_type):
     """
-    Calculates the Fisher ratio for each cancer type.
+    Calculate the Fisher ratio for each cancer type.
 
-    Parameters:
-    - filtered_data_by_cancer_type (dict): Data filtered by cancer type.
+    Args:
+        filtered_data_by_cancer_type (dict): A dictionary of filtered data by cancer type.
 
     Returns:
-    - dict: Fisher scores for each cancer type.
+        dict: A dictionary containing the Fisher ratio for each cancer type.
     """
     fisher_scores = {}
     for cancer_type, data in filtered_data_by_cancer_type.items():
-        # Calculate means and variances for genes, assuming data is transposed correctly
         means = data.mean(axis=1)
         variances = data.var(axis=1)
-
-        # Calculate Fisher Score as the ratio of between-class variance to within-class variance
         fisher_score = means.var() / variances.mean()
         fisher_scores[cancer_type] = fisher_score
-
     return fisher_scores
 
-file_path = '/Users/colt/Downloads/CPSC 571/wetransfer_init_data_design-csv_2024-03-12_2057/normalized_data.csv'
-df = load_large_csv(file_path)
 
-processed_df, filtered_data_by_cancer_type = preprocess_data(df)
+def train_and_evaluate_models(X_train, X_test, y_train, y_test, y_test_binarized, inv_cancer_type_mapping, num_classes):
+    """
+    Train and evaluate multiple machine learning models on the given data.
 
-# Calculate Fisher scores
-fisher_scores = calculate_fisher_ratio(filtered_data_by_cancer_type)
-print(fisher_scores)
+    Args:
+        X_train (np.ndarray): The training features.
+        X_test (np.ndarray): The testing features.
+        y_train (np.ndarray): The training labels.
+        y_test (np.ndarray): The testing labels.
+        y_test_binarized (np.ndarray): The binarized testing labels.
+        inv_cancer_type_mapping (dict): The inverse mapping of cancer types to labels.
+        num_classes (int): The number of unique classes.
 
-# Create a DataFrame with Fisher scores
-fisher_df = pd.DataFrame.from_dict(fisher_scores, orient='index', columns=['Fisher Score'])
+    Returns:
+        None
+    """
+    models = [
+        ('Deep Forest', gcForest(shape_1X=7, window=7, tolerance=0.0, min_samples_mgs=10, min_samples_cascade=7)),
+        ('Random Forest', RandomForestClassifier(n_estimators=100, random_state=42)),
+        ('Neural Network', create_neural_network(X_train.shape[1], num_classes)),
+        ('KNN', KNeighborsClassifier(n_neighbors=5))
+    ]
 
-# Merge the Fisher scores with the processed DataFrame
-merged_df = pd.merge(processed_df, fisher_df, left_index=True, right_index=True)
+    for model_name, model in models:
+        if model_name == 'Neural Network':
+            model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=0)
+            y_pred = model.predict(X_test)
+            y_pred_classes = np.argmax(y_pred, axis=1)
+        else:
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            y_pred_classes = y_pred
 
-# Sort the merged DataFrame by Fisher scores in descending order
-sorted_df = merged_df.sort_values(by='Fisher Score', ascending=False)
+        print(f"{model_name} Accuracy:", accuracy_score(y_test, y_pred_classes))
+        print(f"{model_name} Precision:", precision_score(y_test, y_pred_classes, average='weighted'))
+        print(f"{model_name} Recall:", recall_score(y_test, y_pred_classes, average='weighted'))
+        print(f"{model_name} F1-score:", f1_score(y_test, y_pred_classes, average='weighted'))
 
-# Select the top k features based on Fisher scores
-k = 1000  # Select the top 1000 features
-top_features = sorted_df.iloc[:, :-1].columns[:k]
+        if model_name == 'Neural Network':
+            print(f"{model_name} AUC:", roc_auc_score(y_test_binarized, y_pred, multi_class='ovr'))
+        else:
+            y_pred_proba = model.predict_proba(X_test)
+            print(f"{model_name} AUC:", roc_auc_score(y_test_binarized, y_pred_proba, multi_class='ovr'))
 
-# Extract cancer types from column headers for mapping
-cancer_types = processed_df.index.str.split('_').str[-1]
+        print(f"\n{model_name} Accuracy per Cancer Type:")
+        print_accuracy_per_cancer_type(y_test, y_pred_classes, inv_cancer_type_mapping)
+        print()
 
-# Map cancer types to numerical values
-cancer_type_mapping = {'BRCA': 0, 'BRACA': 1, 'COCA': 2, 'KICA': 3, 'LECA': 4, 'LUCA': 5}
-y = cancer_types.map(cancer_type_mapping).values
 
-# Reset index of processed DataFrame to avoid confusion
-processed_df.reset_index(drop=True, inplace=True)
+def create_neural_network(input_shape, num_classes):
+    """
+    Create a neural network model using Keras.
 
-# Use the selected top features as the feature set X
-X = processed_df[top_features].values
+    Args:
+        input_shape (int): The shape of the input features.
+        num_classes (int): The number of output classes.
 
-# Setup K-Folds Cross Validation
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
-fold_accuracies = []
-
-for train_index, test_index in kf.split(X):
-    # Split data into training and testing sets
-    X_train, X_test = X[train_index], X[test_index]
-    y_train, y_test = y[train_index], y[test_index]
-
-    # Train and evaluate Deep Forest model
-    gcf = gcForest(shape_1X=7, window=7, tolerance=0.0, min_samples_mgs=10, min_samples_cascade=7)
-    gcf.fit(X_train, y_train)
-    y_pred_gcf = gcf.predict(X_test)
-    print("Deep Forest Accuracy:", accuracy_score(y_test, y_pred_gcf))
-
-    # Train and evaluate Neural Network model
+    Returns:
+        keras.Model: The created neural network model.
+    """
     model = Sequential([
-        Input(shape=(X_train.shape[1],)),
+        Input(shape=(input_shape,)),
         Dense(64, activation='relu'),
         Dense(64, activation='relu'),
-        Dense(len(np.unique(y)), activation='softmax')
+        Dense(num_classes, activation='softmax')
     ])
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    history = model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=0)
-    y_pred_nn = model.predict(X_test)
-    y_pred_nn = np.argmax(y_pred_nn, axis=1)  # Convert probabilities to class labels
-    print("Neural Network Accuracy:", accuracy_score(y_test, y_pred_nn))
+    return model
 
-    # Train and evaluate K-Nearest Neighbors model
-    knn = KNeighborsClassifier(n_neighbors=5)
-    knn.fit(X_train, y_train)
-    y_pred_knn = knn.predict(X_test)
-    print("KNN Accuracy:", accuracy_score(y_test, y_pred_knn))
-
-# Reverse the cancer type mapping for interpretation
-inv_cancer_type_mapping = {v: k for k, v in cancer_type_mapping.items()}
 
 def print_accuracy_per_cancer_type(y_true, y_pred, inv_mapping):
     """
-    Prints the accuracy for each cancer type based on true and predicted labels.
+    Print the accuracy for each cancer type.
 
-    Parameters:
-    - y_true (array): True labels.
-    - y_pred (array): Predicted labels.
-    - inv_mapping (dict): Inverse mapping of cancer types to numerical labels.
+    Args:
+        y_true (np.ndarray): The true labels.
+        y_pred (np.ndarray): The predicted labels.
+        inv_mapping (dict): The inverse mapping of labels to cancer types.
+
+    Returns:
+        None
     """
-    # Convert numerical labels back to cancer type strings
     y_true_types = [inv_mapping[label] for label in y_true]
     y_pred_types = [inv_mapping[label] for label in y_pred]
 
-    # Calculate and print accuracy for each cancer type
     for cancer_type in inv_mapping.values():
-        # Find indices of true labels for the current cancer type
         indices = [i for i, x in enumerate(y_true_types) if x == cancer_type]
         if not indices:
             print(f"No samples for {cancer_type}.")
             continue
 
-        # Subset true and predicted labels for the current cancer type
         y_true_subset = [y_true_types[i] for i in indices]
         y_pred_subset = [y_pred_types[i] for i in indices]
 
-        # Calculate and print accuracy
         accuracy = accuracy_score(y_true_subset, y_pred_subset)
         print(f"Accuracy for {cancer_type}: {accuracy:.4f}")
 
-print("Deep Forest Accuracy per Cancer Type:")
-print_accuracy_per_cancer_type(y_test, y_pred_gcf, inv_cancer_type_mapping)
 
-print("\nNeural Network Accuracy per Cancer Type:")
-print_accuracy_per_cancer_type(y_test, y_pred_nn, inv_cancer_type_mapping)
+if __name__ == '__main__':
+    # Load the CSV file
+    file_path = '/Users/colt/Downloads/CPSC 571/wetransfer_init_data_design-csv_2024-03-12_2057/normalized_data.csv'
+    df = load_large_csv(file_path)
 
-print("\nKNN Accuracy per Cancer Type:")
-print_accuracy_per_cancer_type(y_test, y_pred_knn, inv_cancer_type_mapping)
+    # Preprocess the data
+    processed_df, filtered_data_by_cancer_type = preprocess_data(df)
+
+    # Calculate Fisher ratio for each cancer type
+    fisher_scores = calculate_fisher_ratio(filtered_data_by_cancer_type)
+    print(fisher_scores)
+
+    # Merge Fisher scores with the processed DataFrame and sort by Fisher score
+    fisher_df = pd.DataFrame.from_dict(fisher_scores, orient='index', columns=['Fisher Score'])
+    merged_df = pd.merge(processed_df, fisher_df, left_index=True, right_index=True)
+    sorted_df = merged_df.sort_values(by='Fisher Score', ascending=False)
+
+    # Select the top k features
+    k = 1000
+    # Select the top k features based on Fisher score
+    top_features = sorted_df.iloc[:, :-1].columns[:k]
+
+    # Map cancer types to numerical labels
+    cancer_types = processed_df.index.str.split('_').str[-1]
+    cancer_type_mapping = {'BRCA': 0, 'BRACA': 1, 'COCA': 2, 'KICA': 3, 'LECA': 4, 'LUCA': 5}
+    y = cancer_types.map(cancer_type_mapping).values
+
+    # Reset index of the processed DataFrame
+    processed_df.reset_index(drop=True, inplace=True)
+
+    # Select the top features from the processed DataFrame
+    X = processed_df[top_features].values
+
+    # Initialize KFold cross-validation
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+    # Create an inverse mapping of cancer type labels to names
+    inv_cancer_type_mapping = {v: k for k, v in cancer_type_mapping.items()}
+
+    # Perform cross-validation
+    for train_index, test_index in kf.split(X):
+        # Split the data into training and testing sets
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        # Binarize the testing labels for multi-class AUC calculation
+        y_test_binarized = label_binarize(y_test, classes=np.unique(y))
+
+        # Get the number of unique classes
+        num_classes = len(np.unique(y))
+
+        # Train and evaluate models
+        train_and_evaluate_models(X_train, X_test, y_train, y_test, y_test_binarized, inv_cancer_type_mapping, num_classes)
+
+    # Create an inverse mapping of cancer type labels to names
+    inv_cancer_type_mapping = {v: k for k, v in cancer_type_mapping.items()}
