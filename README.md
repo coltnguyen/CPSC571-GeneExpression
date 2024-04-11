@@ -7,6 +7,16 @@
 
 ## Requirements
 
+R is required to process the data. R installations for different operating systems can be found here:
+- [Windows](https://cran.rstudio.com/bin/windows/) 
+- [MacOS](https://cran.rstudio.com/bin/macosx/)
+- [Linux](https://cran.rstudio.com/bin/linux/)
+
+[RStudio](https://posit.co/download/rstudio-desktop/) was the IDE used to work with R.
+
+The following package is required to normalize the data using R:
+- [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+
 The following Python packages are required to run the models:
 - python
 - pandas
@@ -17,6 +27,11 @@ The following Python packages are required to run the models:
 
 ### Installation
 `pip install -r requirements.txt`
+
+## Data Normalization
+To normalize the data run `init_data.csv` through the `data_normalization.R` script.
+
+## Models
 
 The following models are implemented in this repository:
 

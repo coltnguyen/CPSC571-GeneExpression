@@ -2,7 +2,7 @@
 library(DESeq2)
 
 # set working directory where all the data files are stored
-setwd('C:/Users/toque/Desktop/CPSC_571-Design_Implementation_Database_Systems/03-Assignments/Project/yy-Data')
+setwd('.../CPSC571-GeneExpression/Data')
 
 # load count data
 count_data <- read.csv('init_data.csv', header=TRUE, row.names=1)
