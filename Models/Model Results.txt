@@ -112,6 +112,76 @@ Fisher Ratio + K-Folds.py:
             Random Forest F1-score: 0.9649839553029995
             Random Forest AUC: 0.9942111937095254
 
+Fisher Ratio + Neighbourhood Rough Set (NRS) + K-Folds.py:
+----------------------------------------------------------------------------------------------------------
+
+    Neural Network Accuracies:
+        Accuracy for BRCA: 0.9000
+        Accuracy for BRACA: 1.0000
+        Accuracy for COCA: 0.9286
+        Accuracy for KICA: 0.9143
+        Accuracy for LECA: 0.9861
+        Accuracy for LUCA: 0.9231
+            Neural Network Accuracy: 0.8743718592964824
+            Neural Network Precision: 0.879620016920368
+            Neural Network Recall: 0.8743718592964824
+            Neural Network F1-score: 0.874569539865809
+            Neural Network AUC: 0.9201092956198257
+
+Fisher Ratio + Neighbourhood Rough Set (NRS) + Keras Tuner (Neural Network Only).py:
+----------------------------------------------------------------------------------------------------------
+    K-Nearest Neighbors Accuracies:
+        Accuracy for BRCA: 0.8462
+        Accuracy for BRACA: 0.8636
+        Accuracy for COCA: 0.9000
+        Accuracy for KICA: 0.8649
+        Accuracy for LECA: 1.0000
+        Accuracy for LUCA: 0.8235
+            KNN Accuracy: 0.8944723618090452
+            KNN Precision: 0.8964317222199999
+            KNN Recall: 0.8944723618090452
+            KNN F1-score: 0.8942863886194954
+            KNN AUC: 0.9713167072605037
+
+    Neural Network Accuracies:
+        Accuracy for BRCA: 0.8462
+        Accuracy for BRACA: 0.8636
+        Accuracy for COCA: 0.9000
+        Accuracy for KICA: 0.8378
+        Accuracy for LECA: 0.9825
+        Accuracy for LUCA: 0.7647
+            Neural Network Accuracy: 0.8743718592964824
+            Neural Network Precision: 0.879620016920368
+            Neural Network Recall: 0.8743718592964824
+            Neural Network F1-score: 0.874569539865809
+            Neural Network AUC: 0.9201092956198257
+
+    Deep Forest Accuracies:
+        Accuracy for BRCA: 0.6923
+        Accuracy for BRACA: 0.6364
+        Accuracy for COCA: 0.3000
+        Accuracy for KICA: 0.4054
+        Accuracy for LECA: 1.0000
+        Accuracy for LUCA: 0.5000
+            Deep Forest Accuracy: 0.6683417085427136
+            Deep Forest Precision: 0.7163959047805257
+            Deep Forest Recall: 0.6683417085427136
+            Deep Forest F1-score: 0.6705094534096175
+            Deep Forest AUC: 0.8875961384633286
+
+    Random Forest Accuracies:
+        Accuracy for BRCA: 0.9744
+        Accuracy for BRACA: 0.9545
+        Accuracy for COCA: 1.0000
+        Accuracy for KICA: 0.9730
+        Accuracy for LECA: 1.0000
+        Accuracy for LUCA: 0.8824
+            Random Forest Accuracy: 0.964824120603015
+            Random Forest Precision: 0.9658462986116202
+            Random Forest Recall: 0.964824120603015
+            Random Forest F1-score: 0.9647016032994271
+            Random Forest AUC: 0.99271778538925
+
 Neighbourhood Rough Set (NRS) + K-Folds.py:
 ----------------------------------------------------------------------------------------------------------
     K-Nearest Neighbors Accuracies:
