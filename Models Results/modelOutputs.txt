@@ -112,7 +112,7 @@ Fisher Ratio + K-Folds.py:
             Random Forest F1-score: 0.9649839553029995
             Random Forest AUC: 0.9942111937095254
 
-Fisher Ratio + Neighbourhood Rough Set (NRS) + K-Folds.py:
+Fisher Ratio + Neighbourhood Rough Set (NRS) + Keras Tuner (Neural Network Only).py:
 ----------------------------------------------------------------------------------------------------------
 
     Neural Network Accuracies:
@@ -128,7 +128,7 @@ Fisher Ratio + Neighbourhood Rough Set (NRS) + K-Folds.py:
             Neural Network F1-score: 0.874569539865809
             Neural Network AUC: 0.9201092956198257
 
-Fisher Ratio + Neighbourhood Rough Set (NRS) + Keras Tuner (Neural Network Only).py:
+Fisher Ratio + Neighbourhood Rough Set (NRS) + K-Folds.py:
 ----------------------------------------------------------------------------------------------------------
     K-Nearest Neighbors Accuracies:
         Accuracy for BRCA: 0.8462
