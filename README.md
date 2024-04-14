@@ -109,14 +109,6 @@ This model uses Principal Component Analysis (PCA) as a dimensionality reduction
 **Parameters:**
 - `n_components`: The number of principal components to keep.
 
-### ReliefF + K-Folds
-
-This model uses the ReliefF algorithm as a feature selection method, followed by K-fold cross-validation to evaluate the performance of various machine learning algorithms.
-
-**Parameters:**
-- `n_features_to_select`: The number of features to select using ReliefF.
-- `n_neighbors`: The number of neighbors to consider in the ReliefF algorithm.
-
 ## Usage
 
 To run the models, simply execute the corresponding Python script in the `Models` folder. The scripts will load the data, preprocess it, apply the feature selection method (if applicable), and perform the K-fold cross-validation.
